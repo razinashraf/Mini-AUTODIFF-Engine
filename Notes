@@ -1,0 +1,37 @@
+This separation is the whole architecture
+Operation
+"What are the local gradients?"
+        │
+        ▼
+Autograd Engine
+"Where should they go, and what runs next?"
+        │
+        ▼
+Tensor
+"Store my accumulated gradient."
+
+
+
+Compare that with v1:
+
+Value._backward()
+    ↓
+calculate gradient
+    ↓
+modify parents
+
+
+
+In v2:
+
+Add.backward()
+    ↓
+calculate gradients
+    ↓
+return them
+
+Engine
+    ↓
+accumulate them
+    ↓
+continue traversal

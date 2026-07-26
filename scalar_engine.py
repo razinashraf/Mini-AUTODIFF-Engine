@@ -14,7 +14,7 @@ class Value:
                     "+")
 
             def _backward():
-                  self.grad += out.grad
+                  self.grad += out.grad 
                   other.grad += out.grad
                   
             out._backward = _backward
@@ -42,9 +42,9 @@ class Value:
                 
                build_topo(self)
                
-               self.grad = 1
+               self.grad = 1 # dL/dL = 1
 
-               for node in reversed(topo):
+               for node in reversed(topo): # Reverse topological order (backpropagation)
                      node._backward()
 
 a = Value(2)
