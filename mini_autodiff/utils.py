@@ -17,3 +17,26 @@ def unbroadcast(grad: np.ndarray, target_shape: tuple) -> np.ndarray:
             grad = grad.sum(axis=axis, keepdims=True)
 
     return grad
+
+
+def validate_shape(shape):
+    if isinstance(shape, int): # turn 3 into (3,)
+        shape = (shape,)
+
+    if not isinstance(shape, tuple):
+        raise TypeError("shape must be an int or tuple of integers")
+
+    if any(not isinstance(dim, int) for dim in shape):
+        raise TypeError("all dimensions must be integers")
+
+    """
+    2    → not int? → False
+    3.5  → not int? → True   ← problem!
+    4    → not int? → False
+    """
+    
+    if any(dim < 0 for dim in shape):
+        raise ValueError("dimensions cannot be negative")
+
+
+    return shape

@@ -35,7 +35,7 @@ class Tensor:
         # Should this tensor participate in autograd?
         self.requires_grad = requires_grad
 
-    @property
+    @property #does not need () when calling
     def is_leaf(self) -> bool:
         return self.creator is None
 
