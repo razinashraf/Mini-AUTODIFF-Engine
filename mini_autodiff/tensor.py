@@ -55,3 +55,8 @@ class Tensor:
         from .operations import Multiply
 
         return Multiply().forward(self, other)
+
+    def __matmul__(self, other):
+        from .operations import MatMul
+
+        return MatMul().forward(self, other)

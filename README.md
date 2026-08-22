@@ -143,24 +143,22 @@ Biases are initialized to zero.
 
 ---
 
-# 🚧 Version 2.2 — Dense Layers
+### ✅ Version 2.2 — Dense Layers
 
-The next stage is to build the first neural network component on top of the existing Tensor and Autograd systems.
+Implemented:
 
-## Section 9 — Dense Layers
+- [x] Matrix multiplication operation
+- [x] Matrix multiplication gradients
+- [x] Affine transformation
+- [x] Dense / Linear layer
+- [x] Trainable weight parameter
+- [x] Trainable bias parameter
+- [x] Batch processing
+- [x] Shape analysis
+- [x] Forward pass
+- [x] Backward pass
+- [x] Dense layer tests
 
-Planned implementation:
-
-* [ ] Matrix multiplication operation
-* [ ] Affine transformation
-* [ ] Dense / Linear layer
-* [ ] Trainable weight parameter
-* [ ] Trainable bias parameter
-* [ ] Batch processing
-* [ ] Shape validation
-* [ ] Forward pass
-* [ ] Backward pass through matrix multiplication
-* [ ] Dense layer tests
 
 The fundamental transformation is:
 
@@ -273,12 +271,12 @@ Current operations include:
 ```text
 Add
 Multiply
+MatMul
 ```
 
 Future operations will include:
 
 ```text
-MatMul
 ReLU
 Sigmoid
 Tanh
@@ -466,7 +464,8 @@ Mini-AUTODIFF-Engine/
 │   ├── operations.py
 │   ├── engine.py
 │   ├── utils.py
-│   └── init.py
+│   ├── init.py
+|   └── layers.py
 │
 ├── tests/
 │   ├── test_add.py

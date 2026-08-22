@@ -81,4 +81,27 @@ class Multiply(Operation):
         )
 
         return grad_left, grad_right
-    
+
+
+class MatMul(Operation):
+    def forward(self, left: Tensor, right: Tensor) -> Tensor:
+        out = Tensor(
+            left.data @ right.data,
+            requires_grad=(
+                left.requires_grad or right.requires_grad
+            ),
+        )
+
+        out.parents = (left, right)
+        out.creator = self
+
+        self.left = left
+        self.right = right
+
+        return out
+
+    def backward(self, grad_output):
+        grad_left = grad_output @ self.right.data.T
+        grad_right = self.left.data.T @ grad_output
+
+        return grad_left, grad_right
