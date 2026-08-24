@@ -28,6 +28,11 @@ The project evolves progressively from scalar automatic differentiation into ten
 * Xavier initialization
 * He initialization
 * Bias initialization
+* Matrix multiplication
+* Dense / Linear layers
+* ReLU
+* Sigmoid
+* Tanh
 * Unit testing
 
 ---
@@ -120,6 +125,7 @@ weight = Parameter(...)
 ```
 
 Parameters automatically require gradients and are intended to be updated by optimizers during training.
+Parameters are deliberately separated from ordinary tensors so that future optimizers and model abstractions can identify which tensors should be updated during training.
 
 ### Initialization
 
@@ -192,56 +198,126 @@ XW + b → (32, 64)
 
 This stage introduces matrix multiplication and the first neural-network layer built directly on top of the autodiff engine.
 
+
+# ✅ Version 2.3 — Activation Functions
+
+The engine now supports nonlinear activation functions required to construct neural networks.
+
+Implemented:
+
+* [x] ReLU
+* [x] ReLU backward propagation
+* [x] Sigmoid
+* [x] Sigmoid backward propagation
+* [x] Tanh
+* [x] Tanh backward propagation
+* [x] Activation unit tests
+* [x] Multi-layer nonlinear computational graphs
+
+### ReLU
+
+\[
+ReLU(x)=\max(0,x)
+\]
+
+Derivative:
+
+\[
+ReLU'(x)=
+\begin{cases}
+0 & x < 0 \\
+1 & x > 0
+\end{cases}
+\]
+
+ReLU acts as a nonlinear gradient gate. Negative inputs produce zero output and block the gradient, while positive inputs pass the gradient through.
+
+### Sigmoid
+
+\[
+\sigma(x)=\frac{1}{1+e^{-x}}
+\]
+
+Derivative:
+
+\[
+\sigma'(x)=\sigma(x)(1-\sigma(x))
+\]
+
+Sigmoid maps values into the range:
+
+\[
+(0,1)
+\]
+
+### Tanh
+
+\[
+\tanh(x)=\frac{e^x-e^{-x}}{e^x+e^{-x}}
+\]
+
+Derivative:
+
+\[
+\tanh'(x)=1-\tanh^2(x)
+\]
+
+Tanh maps values into the range:
+
+\[
+(-1,1)
+\]
+
+The activation functions are implemented as operations so that their local derivatives integrate directly with the existing autograd engine.
+
+
 ---
 
 # 📅 Version 3.0 — Neural Network Framework
 
-After the dense layer is complete, the engine will evolve into a small neural network framework.
+The engine will now evolve from individual neural network components into a small, usable neural network framework.
 
 Planned:
 
-* [ ] ReLU
-* [ ] Sigmoid
-* [ ] Tanh
-* [ ] Linear / Dense layers
-* [ ] Neuron abstraction
-* [ ] Layer abstraction
+* [ ] Module / Layer abstraction
+* [ ] Parameter registration
 * [ ] Sequential models
+* [ ] Neuron abstraction
+* [ ] MLP
 * [ ] Loss functions
+* [ ] Softmax
+* [ ] Cross entropy
 * [ ] Optimizers
 * [ ] SGD
 * [ ] Adam
 * [ ] Training loop
-* [ ] Model parameters
+* [ ] Mini-batch training
+* [ ] Model evaluation
 * [ ] Model serialization
 * [ ] MNIST training
-
----
 
 # Architecture
 
 The framework separates numerical storage, mathematical operations, and graph execution.
 
-```text
-                       Public API
-                           │
-                           ▼
-                        Tensor
-                   data / grad / graph
-                           │
-                    created by
-                           ▼
-                       Operation
-                  forward / backward
-                           │
-                           ▼
-                    Autograd Engine
-             graph traversal / propagation
-                           │
-                           ▼
-                       Parameter
-                  trainable Tensor values
-```
+                    Public API
+                        │
+                        ▼
+                     Tensor
+                  data / grad
+                  graph state
+                        │
+             ┌──────────┴──────────┐
+             ▼                     ▼
+         Operation             Parameter
+      forward/backward        trainable Tensor
+             │
+             ▼
+       Autograd Engine
+    graph traversal / propagation
+             │
+             ▼
+        Gradients
 
 The responsibilities are intentionally separated.
 
@@ -266,21 +342,16 @@ Responsible for:
 * Connecting inputs to outputs
 * Returning gradients for input tensors
 
-Current operations include:
+
+ operations include:
 
 ```text
 Add
 Multiply
 MatMul
-```
-
-Future operations will include:
-
-```text
 ReLU
 Sigmoid
 Tanh
-...
 ```
 
 ### Autograd Engine
@@ -302,6 +373,18 @@ Responsible for representing trainable tensors.
 Parameters are intended to be consumed by future neural network layers and optimizers.
 
 ---
+
+### Activation Functions
+
+Activation functions are implemented as operations rather than being embedded directly into the Tensor class.
+
+They provide nonlinear transformations such as:
+
+```text
+ReLU
+Sigmoid
+Tanh
+
 
 # How Automatic Differentiation Works
 
@@ -574,6 +657,33 @@ Broadcast reduction
 
 ---
 
+A nonlinear neural network computation can now be constructed from the same primitives:
+
+```python
+layer1 = Linear(3, 4)
+layer2 = Linear(4, 1)
+
+hidden = layer1(x)
+hidden = hidden.relu()
+
+output = layer2(hidden)
+output = output.sigmoid()
+
+output.backward()
+
+Input
+  ↓
+Linear
+  ↓
+ReLU
+  ↓
+Linear
+  ↓
+Sigmoid
+  ↓
+Output
+
+
 # Educational Goal
 
 Mini-AUTODIFF-Engine is an educational implementation designed to understand the internal mechanisms behind automatic differentiation and neural network frameworks.
@@ -638,37 +748,34 @@ The objective is to understand the architecture deeply enough that a high-level 
 
 ```text
                          Mini-AUTODIFF-Engine
-
                                   │
                                   ▼
-
                        Version 1 — Scalar
-                    Reverse-Mode Autodiff
+                         Reverse-Mode Autodiff
                                   │
                                   ▼
-
                        Version 2 — Tensor
-                    Reverse-Mode Autodiff
+                         Reverse-Mode Autodiff
                                   │
                                   ▼
-
-                    Version 2.1 — Tensor Library
-               Parameters + Initialization Utilities
+                     Version 2.1 — Tensor Library
+                    Parameters + Initialization
                                   │
                                   ▼
-
-                    Version 2.2 — Dense Layers
-                  MatMul + Affine Transformations
+                      Version 2.2 — Dense Layers
+                     MatMul + Affine Transformations
                                   │
                                   ▼
-
-                       Version 3 — Neural Nets
-                Activations + Layers + Loss Functions
+                 Version 2.3 — Activation Functions
+                       ReLU + Sigmoid + Tanh
                                   │
                                   ▼
-
-                         Training Framework
-                     Optimizers + Training Loop
+                  Version 3 — Neural Network Framework
+                         Layers + Loss Functions
+                                  │
+                                  ▼
+                       Training Framework
+                    Optimizers + Training Loop
 ```
 
 ---

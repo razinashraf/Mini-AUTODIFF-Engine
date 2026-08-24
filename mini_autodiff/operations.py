@@ -2,6 +2,7 @@ from __future__ import annotations
 from .tensor import Tensor
 from .utils import unbroadcast
 
+import numpy as np
 
 class Operation:
     """
@@ -105,3 +106,84 @@ class MatMul(Operation):
         grad_right = self.left.data.T @ grad_output
 
         return grad_left, grad_right
+
+class ReLU(Operation):
+    def forward(self, x: Tensor) -> Tensor:
+        out = Tensor(
+            np.maximum(0, x.data),
+            requires_grad=x.requires_grad,
+        )
+
+        out.parents = (x,)
+        out.creator = self
+
+        self.x = x # storing input.
+
+        return out
+
+    def backward(self, grad_output):
+        grad_input = grad_output * (self.x.data > 0) #[False, True, False, True]=[0, 1, 0, 1](mult = chainrule)
+
+        return (grad_input, )
+        """
+        parents:       (x,)
+        gradients:     ([0, 20],)
+                 ↑
+             ONE gradient
+
+        x → [0, 20]
+        """
+
+
+class Sigmoid(Operation):
+    def forward(self, x: Tensor) -> Tensor:
+        data = 1.0 / (1.0 + np.exp(-x.data))
+
+        out = Tensor(
+            data,
+            requires_grad=x.requires_grad,
+        )
+
+        out.parents = (x,)
+        out.creator = self
+
+        self.output = out
+
+        return out
+
+    def backward(self, grad_output):
+        sigmoid_derivative = (
+            self.output.data *
+            (1.0 - self.output.data)
+        )
+
+        grad_input = grad_output * sigmoid_derivative
+
+        return (grad_input,)
+
+class Tanh(Operation):
+    def forward(self, x: Tensor) -> Tensor:
+        data = np.tanh(x.data)
+
+        out = Tensor(
+            data,
+            requires_grad=x.requires_grad,
+        )
+
+        out.parents = (x,)
+        out.creator = self
+
+        self.output = out
+
+        return out
+
+    def backward(self, grad_output):
+        tanh_derivative = (
+            1.0 - self.output.data ** 2
+        )
+
+        grad_input = (
+            grad_output * tanh_derivative
+        )
+
+        return (grad_input,)

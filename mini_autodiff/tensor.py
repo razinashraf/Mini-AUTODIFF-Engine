@@ -60,3 +60,18 @@ class Tensor:
         from .operations import MatMul
 
         return MatMul().forward(self, other)
+
+    def relu(self):
+        from .operations import ReLU
+
+        return ReLU().forward(self)
+
+    def sigmoid(self):
+        from .operations import Sigmoid
+
+        return Sigmoid().forward(self)
+
+    def tanh(self):
+        from .operations import Tanh
+
+        return Tanh().forward(self)
