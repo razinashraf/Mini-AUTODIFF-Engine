@@ -31,8 +31,8 @@ class AutogradEngine:
             input_grads = tensor.creator.backward(tensor.grad)
 
             for parent, grad in zip(tensor.parents, input_grads):  #(c, 1) (a, 1) 
-                if parent.requires_grad:
-                    parent.grad += grad
-
+                
+                    if parent.requires_grad:
+                        parent.grad += grad
 
         

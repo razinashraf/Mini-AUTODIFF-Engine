@@ -29,3 +29,5 @@ def test_mlp_activation_chain():
 
     assert layer2.weight.grad.shape == (4, 1)
     assert layer2.bias.grad.shape == (1,)
+
+

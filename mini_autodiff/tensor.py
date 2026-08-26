@@ -75,3 +75,87 @@ class Tensor:
         from .operations import Tanh
 
         return Tanh().forward(self)
+
+    def __sub__(self, other):
+        from .operations import Subtract
+
+        return Subtract().forward(self, other)
+
+    def abs(self):
+        from .operations import Abs
+
+        return Abs().forward(self)
+
+    def mean(self):
+        from .operations import Mean
+
+        return Mean().forward(self)
+
+    def square(self):
+        from .operations import Square
+
+        return Square().forward(self)
+
+    def log(self):
+        from .operations import Log
+
+        return Log().forward(self)
+    
+    def __neg__(self):
+        from .operations import Negate
+
+        return Negate().forward(self)
+
+    def __rsub__(self, other):
+        return Tensor(other) - self
+
+    def exp(self):
+        from .operations import Exp
+
+        return Exp().forward(self)
+
+    def sum(self):
+        from .operations import Sum
+
+        return Sum().forward(self)
+
+    def max(self):
+        from .operations import Max
+
+        return Max().forward(self)
+
+    def __truediv__(self, other):
+        from .operations import Divide
+
+        if not isinstance(other, Tensor):
+            other = Tensor(other, requires_grad=False)
+
+        return Divide().forward(self, other)
+
+    def __rtruediv__(self, other):
+        from .operations import Divide
+
+        if not isinstance(other, Tensor):
+            other = Tensor(other, requires_grad=False)
+
+        return Divide().forward(other, self)
+
+    def softmax(self):
+        from .activations import softmax
+
+        return softmax(self)
+
+    def logsumexp(self):
+            from .activations import logsumexp
+    
+            return logsumexp(self)
+
+    def select(self, index):
+        from .operations import Select
+
+        return Select().forward(self, index)
+
+    def cross_entropy(self, target):
+        from .losses import cross_entropy
+
+        return cross_entropy(self, target)
