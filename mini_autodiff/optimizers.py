@@ -1,5 +1,6 @@
 import numpy as np
 
+# this function is for an old test, not using now.
 def gradient_descent_step(parameter, learning_rate):
     parameter.data -= learning_rate * parameter.grad
 
